@@ -223,9 +223,10 @@ class CathedralScene extends Phaser.Scene {
   if(!$('title').classList.contains('hidden')||dialogue||!$('modal').classList.contains('hidden')||!$('pin-modal').classList.contains('hidden'))return;
   const step=4;let x=data.x,y=data.y;
   if(dir==='up'){y-=step;data.dir='up'}if(dir==='down'){y+=step;data.dir='down'}if(dir==='left'){x-=step;data.dir='left'}if(dir==='right'){x+=step;data.dir='right'}
+  // The arch is a wide passage; cross the threshold before the outer wall blocks the step.
+  if(data.room==='cathedral'&&dir==='right'&&y>297&&y<367&&x>=449){enterSide();return}
   if(!this.blocked(x,y)){
    data.x=x;data.y=y;this.lastStepAt=this.time.now;
-   if(data.room==='cathedral'&&dir==='right'&&y>303&&y<353&&x>=453){enterSide();return}
    if(data.room==='side'&&dir==='left'&&y>163&&y<205&&x<=26){leaveSide();return}
   }
  }
