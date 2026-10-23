@@ -23,7 +23,7 @@ function restore(){data=fresh();try{
  for(const key of ['started','hintRead','shelfOpen','visitedSide','deskOpen','keyTaken','wireTaken'])data.flags[key]=s.flags[key]===true;
  data.flags.rusaiState=[0,1,2].includes(s.flags.rusaiState)?s.flags.rusaiState:0;
  data.flags.deskOpen ||= s.flags.doorOpen===true || (s.flags.shelfOpen===true && s.flags.visitedSide===true && !data.items.includes('iron_key'));
- data.flags.keyTaken ||= data.flags.deskOpen || data.items.includes('iron_key');data.flags.wireTaken ||= data.items.includes('wire');
+ data.flags.keyTaken ||= data.flags.deskOpen || data.items.includes('iron_key');data.flags.wireTaken ||= data.items.includes('wire') || data.flags.rusaiState===2;
  // If an old save lands in new architecture, shift it to the clear central aisle.
  if(s.room==='cathedral'&&cathedralBlocked(data.x,data.y)){data.x=256;data.y=302}
  }catch{data=fresh()}}
@@ -132,14 +132,18 @@ function drawCathedral(g,flags){
  g.fillStyle(0x8b795b);g.fillRect(209,481,63,3);
  // Pillar shadows sit below the player; upper masonry is drawn in its own depth layer.
  for(const p of PILLARS){g.fillStyle(0x10121a,.65);g.fillRect(p.x-18,p.y+9,39,12)}
+ g.fillStyle(0x171822,.22);g.fillEllipse(256,282,72,15);
+}
+function drawChandelier(g){
  // Large independent chandelier high above Rusa. It never overlaps the face.
  g.lineStyle(2,0x655f53);g.lineBetween(256,31,256,167);
  g.fillStyle(0x1d1c21);g.fillRect(233,174,46,3);
  g.lineStyle(2,0x70634e);g.lineBetween(256,167,228,193);g.lineBetween(256,167,284,193);
  g.lineBetween(228,193,284,193);g.lineBetween(235,187,277,187);
  for(const x of [225,237,249,261,273,285]){g.fillStyle(0x6b5d47);g.fillRect(x-3,192,6,4);g.fillStyle(0xb4a071);g.fillRect(x-1,186,2,5);g.fillStyle(0x998164);g.fillRect(x-2,184,4,2)}
- g.fillStyle(0x171822,.22);g.fillEllipse(256,282,72,15);
+
 }
+
 function drawPillar(g,x,y){
  g.fillStyle(0x262630);g.fillRect(x-12,y-45,24,54);
  g.fillStyle(0x77727b);g.fillRect(x-11,y-43,6,48);
@@ -161,10 +165,11 @@ class CathedralScene extends Phaser.Scene {
  create(){scene=this;this.renderMap();$('start').disabled=false;$('start').textContent='はじめる';$('continue').disabled=false;$('load-status').textContent='準備ができました';this.time.addEvent({delay:130,loop:true,callback:()=>this.draw()})}
  renderMap(){
   $('room-name').textContent=data.room==='cathedral'?'大聖堂':'小部屋';
-  if(this.player)this.player.destroy();if(this.rusai)this.rusai.destroy();if(this.arch)this.arch.forEach(shape=>shape.destroy());this.arch=[];if(this.worldLayer)this.worldLayer.destroy(true);
+  if(this.player)this.player.destroy();if(this.rusai)this.rusai.destroy();if(this.chandelier)this.chandelier.destroy();if(this.arch)this.arch.forEach(shape=>shape.destroy());this.arch=[];if(this.worldLayer)this.worldLayer.destroy(true);
   this.worldLayer=this.add.container(0,0);const g=this.add.graphics();this.worldLayer.add(g);
   if(data.room==='cathedral'){
    drawCathedral(g,data.flags);
+   this.chandelier=this.add.graphics().setDepth(1);drawChandelier(this.chandelier);
    this.rusai=this.add.image(256,282,['rusai-sleep','rusai-chain-awake','rusai-free'][data.flags.rusaiState]).setOrigin(.5,1).setDepth(282);
    for(const p of PILLARS){const cap=this.add.graphics().setDepth(p.y+12);drawPillar(cap,p.x,p.y);this.arch.push(cap)}
   }else{
