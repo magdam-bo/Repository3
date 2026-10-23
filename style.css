@@ -3,3 +3,4 @@
 @media(max-width:650px){.overlay article{padding:7px 10px;max-height:100%;overflow:auto}.overlay h1{font-size:23px;margin:2px 0}.overlay h2{font-size:15px;margin:2px 0 4px}.overlay p{font-size:11px;line-height:1.35;margin:4px 0}.overlay button{padding:5px 9px;font-size:12px}#load-status{font-size:11px}#pin-display{font-size:20px;padding:3px}#pin-pad{grid-template-columns:repeat(3,42px);gap:3px;margin:3px auto 5px}#pin-pad button{min-height:27px;padding:3px}}
 
 #pin-modal article{position:relative}#pin-cancel{position:absolute;top:8px;right:8px;padding:5px 8px}#pin-modal h2{padding-right:48px;padding-left:48px}
+button[hidden]{display:none!important}#modal-content button.selected{background:#766344;border-color:#dec38b;box-shadow:inset 0 0 0 1px #e4c98e}#modal-content button[data-rusai]{min-width:115px}
