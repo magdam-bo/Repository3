@@ -140,12 +140,10 @@ function drawCathedral(g,flags){
  g.fillStyle(0x252833);g.fillRect(452,338,28,43);
  g.fillStyle(0x625e6a);g.fillTriangle(447,343,464,319,481,343);
  g.fillStyle(0x252934);g.fillTriangle(452,343,464,327,478,343);
- g.fillStyle(0x3c3d47);g.fillRect(295,344,185,34);
- g.fillStyle(0x55515b);g.fillRect(295,343,185,1);g.fillRect(295,378,185,1);
- for(let x=296;x<480;x+=16){
-  g.fillStyle((x/16|0)%2?0x41414b:0x3d3e48);g.fillRect(x+1,345,15,32);
-  g.lineStyle(1,0x52505a,.48);g.lineBetween(x,345,x,377);
-  g.lineBetween(x+1,361,x+15,361);
+ for(let row=0;row<2;row++)for(let col=0;col<12;col++){
+  const x=296+col*16+(row%2?8:0),y=344+row*16;
+  g.fillStyle((col+row)%5===0?0x3b3b44:0x373941);g.fillRect(x,y,16,16);
+  g.lineStyle(1,0x514e58,.42);g.strokeRect(x,y,16,16);
  }
  g.fillStyle(0x807477);g.fillRect(451,340,2,40);g.fillRect(477,340,2,40);
  // Cabinet remains separate from the pillar and the path.
@@ -220,8 +218,11 @@ class CathedralScene extends Phaser.Scene {
    // Matching open stone path to the cathedral, aligned with the walk-through boundary.
    g.fillStyle(0x222630);g.fillRect(12,165,18,41);
    g.fillStyle(0x68636a);g.fillRect(12,164,2,42);
-   g.fillStyle(0x3b3a42);g.fillRect(16,174,91,29);
-   for(let x=17;x<107;x+=16){g.fillStyle((x/16|0)%2?0x414047:0x3d3c44);g.fillRect(x+1,175,15,27);g.lineStyle(1,0x535058,.55);g.lineBetween(x,175,x,202);g.lineBetween(x+1,190,x+15,190)}
+   for(let row=0;row<2;row++)for(let col=0;col<6;col++){
+    const x=16+col*16+(row%2?8:0),y=173+row*16;
+    g.fillStyle((col+row)%4===0?0x3a383e:0x36353b);g.fillRect(x,y,16,16);
+    g.lineStyle(1,0x4e4b52,.42);g.strokeRect(x,y,16,16);
+   }
   }
   this.player=this.add.image(data.x,data.y,'x-front-1').setOrigin(.5,1).setDepth(data.y);
   const cam=this.cameras.main;cam.setBounds(0,0,data.room==='cathedral'?480:320,data.room==='cathedral'?512:240);
