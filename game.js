@@ -1,8 +1,8 @@
 (()=>{'use strict';
 const SAVE_KEY='cageCathedral.prototype.v1';
-const CATHEDRAL={width:480,height:512,rusai:{x:256,y:282},chandelier:{x:256,y:195},shelf:{x:384,y:161},altar:{x:256,y:112},door:{x:456,y:328}};
+const CATHEDRAL={width:480,height:512,rusai:{x:256,y:282},chandelier:{x:256,y:195},shelf:{x:384,y:161},altar:{x:256,y:112},door:{x:456,y:356}};
 const PEWS=[196,312,390].flatMap(y=>[68,316].map(x=>({x,y,w:96,h:20})));
-const PILLARS=[160,272,384].flatMap(y=>[40,440].map(x=>({x,y})));
+const PILLARS=[160,272,384].map(y=>({x:40,y})).concat([160,272,432].map(y=>({x:440,y})));
 const hit=(x,y,left,top,right,bottom)=>x>left&&x<right&&y>top&&y<bottom;
 const fresh=()=>({version:2,room:'cathedral',x:221,y:282,dir:'right',items:[],chandelier:{chains:[true,true,true,true],tilt:0},flags:{started:true,rusaiState:0,hintRead:false,shelfOpen:false,deskOpen:false,keyTaken:false,wireTaken:false,visitedSide:false}});
 let data=fresh(),scene,dialogue=null,dialogIndex=0,pin='',lastMove=0,rusaiChoice=0;
@@ -37,7 +37,7 @@ function chooseRusai(choice){closeModal();if(choice===1)say('ルサイ',[rusaiHi
 function openRusaiMenu(){rusaiChoice=0;$('modal-title').textContent='ルサイ';$('modal-content').innerHTML='<p>どうする？</p><button data-rusai="0">話す</button><button data-rusai="1">一緒に考える</button>';$('modal-content').querySelectorAll('[data-rusai]').forEach(b=>b.onclick=()=>chooseRusai(Number(b.dataset.rusai)));$('save').hidden=true;show($('modal'));markRusaiChoice()}
 function markRusaiChoice(){for(const b of $('modal-content').querySelectorAll('[data-rusai]'))b.classList.toggle('selected',Number(b.dataset.rusai)===rusaiChoice)}
 function enterSide(){data.room='side';data.x=38;data.y=188;data.dir='right';data.flags.visitedSide=true;scene.renderMap();save()}
-function leaveSide(){data.room='cathedral';data.x=433;data.y=328;data.dir='left';scene.renderMap();save()}
+function leaveSide(){data.room='cathedral';data.x=433;data.y=CATHEDRAL.door.y;data.dir='left';scene.renderMap();save()}
 function useItem(id,target){if(!data.items.includes(id)||!itemData[id])return;const consume=()=>{if(itemData[id].consume)data.items=data.items.filter(x=>x!==id)};if(target==='desk'&&id==='iron_key'&&data.room==='side'&&near(189,120,40)){consume();data.flags.deskOpen=true;closeModal();say('エックス',['鉄の鍵が小さな錠に合った。机の引き出しが開く。']);save();return}if(target==='rusai'&&id==='wire'&&data.room==='cathedral'&&near(256,274,36)&&data.flags.rusaiState===1){data.flags.rusaiState=2;consume();closeModal();scene.renderMap();say('エックス',['針金を留め具に差し込み、慎重にひねる。','小さな音とともに鎖がほどけた。ルサイは、まだ立ち上がれない。']);save();return}closeModal();say('エックス',['ここでは使えないようだ。対象の近くで使おう。'])}
 function closeModal(){hide($('modal'))}
 function near(tx,ty,r=24){const dx=({up:0,down:0,left:-1,right:1})[data.dir],dy=({up:-1,down:1,left:0,right:0})[data.dir];return Math.hypot(data.x+dx*18-tx,data.y+dy*18-ty)<r}
@@ -47,7 +47,7 @@ function interact(){if(!$('title').classList.contains('hidden'))return;if(dialog
   if(near(CATHEDRAL.shelf.x,CATHEDRAL.shelf.y,35)){if(data.flags.shelfOpen){if(!data.flags.keyTaken){data.flags.keyTaken=true;data.items.push('iron_key');say('エックス',['棚の奥から、古びた鉄の鍵を見つけた。']);save()}else say('エックス',['棚は空になっている。'])}else openPin();return}
   if(near(256,112,43)){say('エックス',['祭壇には、蝋燭が二本残されている。火はすべて消えていた。']);return}
   if(near(256,195,31)){say('エックス',['天井から巨大なシャンデリアが吊られている。鎖がきしみ、暗がりに音が吸い込まれた。']);return}
-  if(near(457,328,34)){enterSide();return}
+  if(near(CATHEDRAL.door.x,CATHEDRAL.door.y,34)){enterSide();return}
   say('エックス',['石造りの大聖堂。古い長椅子と、埃をかぶった祭壇が見える。']);return;
  }
  if(near(72,110,38)){data.flags.hintRead=true;say('書類',['端の破れた紙片が机に残っている。','「聖堂の蝋燭の数を、天使の数のあとに続けて記す」','試作用の暗証番号は 1842。正式な謎解きは後から差し替えられる。']);save();return}
@@ -136,20 +136,25 @@ function drawCathedral(g,flags){
   g.fillStyle(0x79604a);g.fillRect(p.x+4,p.y+6,p.w-8,4);
   for(const x of [p.x+6,p.x+p.w-10]){g.fillStyle(0x251e20);g.fillRect(x,p.y+17,5,8)}
  }
- // Cabinet and door, both tied to existing interactions.
+ // Continuous stone path from the nave through the open passage. Every transfer uses path tiles.
+ g.fillStyle(0x262a36);g.fillRect(451,338,29,43);
+ g.fillStyle(0x726b74);g.fillTriangle(447,343,464,319,481,343);
+ g.fillStyle(0x252934);g.fillTriangle(452,343,464,326,478,343);
+ g.fillStyle(0x595663);g.fillRect(295,344,185,34);
+ g.fillStyle(0x857c78);g.fillRect(295,342,185,2);g.fillRect(295,378,185,2);
+ for(let x=296;x<480;x+=16){
+  g.lineStyle(1,0x77717d,.8);g.lineBetween(x,345,x,377);
+  g.fillStyle((x/16|0)%2?0x615d6c:0x66616d);g.fillRect(x+2,350,12,12);
+  g.fillStyle(0x393b49);g.fillRect(x+4,366,9,5);
+ }
+ for(const x of [333,381,429]){g.fillStyle(0xa99671);g.fillTriangle(x,353,x+8,360,x,367)}
+ g.fillStyle(0xb7a784);g.fillRect(451,340,2,40);g.fillRect(477,340,2,40);
+ // Cabinet remains separate from the pillar and the path.
  stone(g,361,138,43,48,0x6b5d50,0x322d31);
  g.fillStyle(flags.shelfOpen?0x252831:0x67513e);g.fillRect(365,143,35,37);
  g.lineStyle(1,0x988266);g.strokeRect(365,143,35,37);
  for(let i=0;i<3;i++)g.lineBetween(369,151+i*9,395,151+i*9);
  g.fillStyle(0xa3885e);g.fillRect(360,135,46,2);
- // Lit pointed side arch and gold floor marks lead into the room.
- g.fillStyle(0x7e705e);g.fillTriangle(443,307,464,283,481,307);
- g.fillStyle(0x282332);g.fillTriangle(449,307,464,292,476,307);
- g.fillStyle(0x121921);g.fillRect(452,306,26,49);
- g.fillStyle(0x797587);g.fillRect(451,306,3,49);g.fillRect(475,306,3,49);
- g.fillStyle(0x8b6f55);g.fillRect(460,310,3,37);g.fillRect(470,310,2,37);
- g.fillStyle(0xb59b71);g.fillRect(447,353,31,3);
- for(const x of [408,422,436]){g.fillStyle(0x887858);g.fillRect(x,325,8,3);g.fillStyle(0x5b5261);g.fillRect(x+2,329,4,2)}
  // South-facing pointed entrance is sealed by the iron birdcage gate.
  g.fillStyle(0x171923);g.fillRect(207,462,66,30);
  g.fillStyle(0x8b8181);g.fillTriangle(202,467,240,444,278,467);
@@ -204,7 +209,7 @@ class CathedralScene extends Phaser.Scene {
   this.worldLayer=this.add.container(0,0);const g=this.add.graphics();this.worldLayer.add(g);
   if(data.room==='cathedral'){
    drawCathedral(g,data.flags);
-   this.chandelier=this.add.graphics().setDepth(1);drawChandelier(this.chandelier,data.chandelier);
+   this.chandelier=this.add.graphics().setDepth(1000);drawChandelier(this.chandelier,data.chandelier);
    this.rusai=this.add.image(256,282,['rusai-sleep','rusai-chain-awake','rusai-free'][data.flags.rusaiState]).setOrigin(.5,1).setDepth(282);
    for(const p of PILLARS){const cap=this.add.graphics().setDepth(p.y+12);drawPillar(cap,p.x,p.y);this.arch.push(cap)}
   }else{
@@ -212,7 +217,13 @@ class CathedralScene extends Phaser.Scene {
    for(let y=0;y<240;y+=16)for(let x=0;x<320;x+=16){g.fillStyle(((x/16+y/16)%2)?0x2b2b30:0x25262c,.95);g.fillRect(x,y,16,16);g.lineStyle(1,0x34343a,.65);g.strokeRect(x,y,16,16)}
    g.fillStyle(0x343238);g.fillRect(12,24,296,204);g.lineStyle(3,0x77716a);g.strokeRect(12,24,296,204);
    g.fillStyle(0x493e34);g.fillRect(50,70,74,58);g.fillStyle(0x786851);g.fillRect(56,76,62,6);
-   g.fillStyle(0x3a3734);g.fillRect(158,91,88,42);g.fillStyle(0x786b59);g.fillRect(166,98,72,7);g.fillStyle(0x15171c);g.fillRect(12,163,16,42);
+   g.fillStyle(0x3a3734);g.fillRect(158,91,88,42);g.fillStyle(0x786b59);g.fillRect(166,98,72,7);
+   // Matching open stone path to the cathedral, aligned with the walk-through boundary.
+   g.fillStyle(0x222630);g.fillRect(12,165,18,41);
+   g.fillStyle(0x77717b);g.fillRect(12,164,3,42);g.fillRect(12,204,95,2);
+   g.fillStyle(0x595663);g.fillRect(16,174,91,29);
+   for(let x=17;x<107;x+=16){g.lineStyle(1,0x77717d,.8);g.lineBetween(x,175,x,202);g.fillStyle((x/16|0)%2?0x615d6c:0x66616d);g.fillRect(x+2,180,12,12)}
+   for(const x of [86,53]){g.fillStyle(0xa99671);g.fillTriangle(x+8,182,x,188,x+8,194)}
   }
   this.player=this.add.image(data.x,data.y,'x-front-1').setOrigin(.5,1).setDepth(data.y);
   const cam=this.cameras.main;cam.setBounds(0,0,data.room==='cathedral'?480:320,data.room==='cathedral'?512:240);
@@ -224,7 +235,7 @@ class CathedralScene extends Phaser.Scene {
   const step=4;let x=data.x,y=data.y;
   if(dir==='up'){y-=step;data.dir='up'}if(dir==='down'){y+=step;data.dir='down'}if(dir==='left'){x-=step;data.dir='left'}if(dir==='right'){x+=step;data.dir='right'}
   // The arch is a wide passage; cross the threshold before the outer wall blocks the step.
-  if(data.room==='cathedral'&&dir==='right'&&y>297&&y<367&&x>=449){enterSide();return}
+  if(data.room==='cathedral'&&dir==='right'&&y>340&&y<379&&x>=449){enterSide();return}
   if(!this.blocked(x,y)){
    data.x=x;data.y=y;this.lastStepAt=this.time.now;
    if(data.room==='side'&&dir==='left'&&y>163&&y<205&&x<=26){leaveSide();return}
