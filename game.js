@@ -137,18 +137,17 @@ function drawCathedral(g,flags){
   for(const x of [p.x+6,p.x+p.w-10]){g.fillStyle(0x251e20);g.fillRect(x,p.y+17,5,8)}
  }
  // Continuous stone path from the nave through the open passage. Every transfer uses path tiles.
- g.fillStyle(0x262a36);g.fillRect(451,338,29,43);
- g.fillStyle(0x726b74);g.fillTriangle(447,343,464,319,481,343);
- g.fillStyle(0x252934);g.fillTriangle(452,343,464,326,478,343);
- g.fillStyle(0x595663);g.fillRect(295,344,185,34);
- g.fillStyle(0x857c78);g.fillRect(295,342,185,2);g.fillRect(295,378,185,2);
+ g.fillStyle(0x252833);g.fillRect(452,338,28,43);
+ g.fillStyle(0x625e6a);g.fillTriangle(447,343,464,319,481,343);
+ g.fillStyle(0x252934);g.fillTriangle(452,343,464,327,478,343);
+ g.fillStyle(0x3c3d47);g.fillRect(295,344,185,34);
+ g.fillStyle(0x55515b);g.fillRect(295,343,185,1);g.fillRect(295,378,185,1);
  for(let x=296;x<480;x+=16){
-  g.lineStyle(1,0x77717d,.8);g.lineBetween(x,345,x,377);
-  g.fillStyle((x/16|0)%2?0x615d6c:0x66616d);g.fillRect(x+2,350,12,12);
-  g.fillStyle(0x393b49);g.fillRect(x+4,366,9,5);
+  g.fillStyle((x/16|0)%2?0x41414b:0x3d3e48);g.fillRect(x+1,345,15,32);
+  g.lineStyle(1,0x52505a,.48);g.lineBetween(x,345,x,377);
+  g.lineBetween(x+1,361,x+15,361);
  }
- for(const x of [333,381,429]){g.fillStyle(0xa99671);g.fillTriangle(x,353,x+8,360,x,367)}
- g.fillStyle(0xb7a784);g.fillRect(451,340,2,40);g.fillRect(477,340,2,40);
+ g.fillStyle(0x807477);g.fillRect(451,340,2,40);g.fillRect(477,340,2,40);
  // Cabinet remains separate from the pillar and the path.
  stone(g,361,138,43,48,0x6b5d50,0x322d31);
  g.fillStyle(flags.shelfOpen?0x252831:0x67513e);g.fillRect(365,143,35,37);
@@ -220,10 +219,9 @@ class CathedralScene extends Phaser.Scene {
    g.fillStyle(0x3a3734);g.fillRect(158,91,88,42);g.fillStyle(0x786b59);g.fillRect(166,98,72,7);
    // Matching open stone path to the cathedral, aligned with the walk-through boundary.
    g.fillStyle(0x222630);g.fillRect(12,165,18,41);
-   g.fillStyle(0x77717b);g.fillRect(12,164,3,42);g.fillRect(12,204,95,2);
-   g.fillStyle(0x595663);g.fillRect(16,174,91,29);
-   for(let x=17;x<107;x+=16){g.lineStyle(1,0x77717d,.8);g.lineBetween(x,175,x,202);g.fillStyle((x/16|0)%2?0x615d6c:0x66616d);g.fillRect(x+2,180,12,12)}
-   for(const x of [86,53]){g.fillStyle(0xa99671);g.fillTriangle(x+8,182,x,188,x+8,194)}
+   g.fillStyle(0x68636a);g.fillRect(12,164,2,42);
+   g.fillStyle(0x3b3a42);g.fillRect(16,174,91,29);
+   for(let x=17;x<107;x+=16){g.fillStyle((x/16|0)%2?0x414047:0x3d3c44);g.fillRect(x+1,175,15,27);g.lineStyle(1,0x535058,.55);g.lineBetween(x,175,x,202);g.lineBetween(x+1,190,x+15,190)}
   }
   this.player=this.add.image(data.x,data.y,'x-front-1').setOrigin(.5,1).setDepth(data.y);
   const cam=this.cameras.main;cam.setBounds(0,0,data.room==='cathedral'?480:320,data.room==='cathedral'?512:240);
